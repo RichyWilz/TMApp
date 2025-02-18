@@ -1,0 +1,136 @@
+{% extends 'home.html' %}
+{% block content %}
+<div class="container mt-2">
+    <h2 class="text-center">TASKS</h2>
+
+    {% if request.user.role|lower in 'task manager, admin' %}
+        <button type="button" class="btn btn-primary mb-3" style="border-radius: 5px;" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            Add Task
+        </button>
+
+        <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTaskModalLabel">ADD TASK</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="modal-form-area">
+                                <div class="modal-form split">
+                                    <input type="hidden" name="task_form_submitted" value="true">
+                                    {{ task_form.as_p }}
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="border-radius: 5px;">SUBMIT</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Add the table-responsive class to make it scrollable on small screens -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered" id="tasksTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created At</th>
+                    <th>Completion Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.name }}</td>
+                        <td>{{ task.description }}</td>
+                        <td>{{ task.created_at }}</td>
+                        <td>
+                        {% if task.completed %}
+                        <span style="color: green; font-size: 20px;">✔</span> <!-- Green Tick for True -->
+                        {% else %}
+                            <span style="color: red; font-size: 20px;">✘</span> <!-- Red X for False -->
+                        {% endif %}
+                    </td>
+                        <td>
+                            {% if request.user.role|lower in 'task manager, admin' %}
+                                <a href="{% url 'update' task.slug %}" class="btn btn-info btn-sm" style="border-radius: 5px;">
+                                    <i class="fas fa-edit"></i> Update
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm" style="border-radius: 5px;" data-bs-toggle="modal" data-bs-target="#deleteTaskModal">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+
+                                <div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-labelledby="deleteTaskModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteTaskModalLabel">Delete Task {{ task.name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="POST" action="{% url 'delete' task.pk %}">
+                                                    {% csrf_token %}
+                                                    <h3>Are you sure you want to delete this task?</h3>
+                                                    <button type="submit" class="btn btn-danger" style="border-radius: 5px;">DELETE TASK</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {% else %}
+                                <button type="button" class="btn btn-success btn-sm" style="border-radius: 5px;" data-bs-toggle="modal" data-bs-target="#completedTaskModal">
+                                    <i class="fas fa-check-circle"></i> Mark as Completed
+                                </button>
+
+                                <div class="modal fade" id="completedTaskModal" tabindex="-1" aria-labelledby="completedTaskModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="completedTaskModalLabel">Confirm Completion</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="POST" action="{% url 'completed' task.pk %}">
+                                                    {% csrf_token %}
+                                                    <h3>Are you sure you want to mark this task as completed?</h3>
+                                                    <button type="submit" class="btn btn-success" style="border-radius: 5px;">Mark as Completed</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- DataTables Script and Initialization -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.11.5/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables for better sorting, searching, and pagination
+        $('#tasksTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true
+        });
+    });
+</script>
+
+{% endblock %}

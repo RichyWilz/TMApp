@@ -1,0 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap");
+
+/* css reset */
+.main-content-area {
+    grid-row: 2/-1;
+    grid-column: 2/-1;
+    height: calc(100vh - var(--navbar-height));
+    overflow-y: auto;
+    background-color: #d2d6de;
+}
+body{
+    background-color: #d2d6de !important;
+}
+a {
+    text-decoration: none !important;
+    color: inherit;
+}
+
+/* Custom CSS for more precise spacing */
+.navbar .welcome-container {
+    margin-right: 20px;  /* Adjust this value for desired space between Welcome and image */
+}
+
+.navbar .dropdown {
+    margin-left: 20px;  /* Adjust this value for desired space between the dropdown and the image */
+}
+
